@@ -1,0 +1,23 @@
+﻿#### MATHS QUIZ ####
+
+Produce a maths quiz app.
+
+## Non-Functional Requirements:
+
+- Should be created as a C# Console App (using .NET Framework)
+- Clean code
+- Ensure there are clear instructions for the user
+
+## Functional Requirements (please complete these one by one, in order)
+
+- Ask 4 simple, hardcoded, maths questions (addition) ie, 5 + 3, 7 + 2. Allows users to answer each question.
+- Show the user their results when all questions have been answered
+- Instead of all addition, ask a question for each operator ( + , -, *, /) - still all hardcoded.
+- Randomly generate the numbers in each question (still using one question for each operator)
+- Randomly generate the operator used in each question.
+- Allow the user to select how many questions they want to be asked
+- Ensure division questions result in an integer answer
+- Add more advanced operators (square root, power operator)
+- Implement a difficulty setting (users can select difficulty, affecting how hard the questions are)
+- Have some questions containing 3 operands (should occur randomly, a certain percentage of the time)
+- Save quiz results to a text file (should keep history of each test taken, with every question that was asked and the user's answer, as well as whether or not the answer was correct)
