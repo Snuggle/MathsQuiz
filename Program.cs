@@ -18,10 +18,10 @@ namespace MathsQuiz
             List<bool> results = new List<bool>();
                      
             Program P = new Program();
-            results.Add(P.AskQuestion('+', 2, 3));
-            results.Add(P.AskQuestion('+', 3, 4));
-            results.Add(P.AskQuestion('+', 4, 5));
-            results.Add(P.AskQuestion('+', 5, 6));
+            results.Add(P.AskQuestion('+', 5, 2));
+            results.Add(P.AskQuestion('-', 5, 2));
+            results.Add(P.AskQuestion('*', 5, 2));
+            results.Add(P.AskQuestion('/', 10, 2));
 
             Func<bool, bool> isTrue = x => x;
             int correctCount = results.Count(isTrue);
@@ -53,6 +53,7 @@ namespace MathsQuiz
             else
             {
                 // Input was not valid, try again.
+                Console.WriteLine("Please type in a number and press ENTER. Repeating question...")
                 return AskQuestion(op, firstNum, secondNum);
             }
         }
@@ -65,6 +66,10 @@ namespace MathsQuiz
                     return (firstNum + secondNum) == answer;
                 case '-':
                     return (firstNum - secondNum) == answer;
+                case '*':
+                    return (firstNum * secondNum) == answer;
+                case '/':
+                    return (firstNum / secondNum) == answer;
                 default:
                     return false;
             }
