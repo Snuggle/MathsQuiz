@@ -10,27 +10,22 @@ namespace MathsQuiz
     {
         Random rnd = new Random();
 
-        static string ListToString(List<bool> someList)
-        {
-            return String.Join(",", someList);
-        }
+        Dictionary<char, Func<double, double, double>> potato = new Dictionary<char, Func<double, double, double>>()
+            {
+                /*{ '+', (x, y) => x + y },
+                { '-', (x, y) => x - y },
+                { '*', (x, y) => x * y },*/
+                { '/', (x, y) => x / y },
+                { '√', (x, y) => (int) Math.Pow(x, y) }
+            };
 
         static void Main(string[] args)
         {
-            List<char> operators = new List<char>() { '+', '-', '*', '/' };
-            int maxRandNumber = 100;
-
+            // ENTRY POINT
+            int maxRandNumber = 10;
             Program P = new Program();
-            int numberOfQuestions = P.HowManyQuestions();
 
-            List<bool> results = new List<bool>();
-            for (int questionNum = 1; questionNum <= numberOfQuestions; questionNum++)
-            {
-                char op = operators[P.rnd.Next(0, operators.Count())];
-                int firstNum = P.rnd.Next(0, maxRandNumber);
-                int secondNum = P.rnd.Next(0, maxRandNumber);
-                results.Add(P.AskQuestion(op, firstNum, secondNum));
-            }
+            List<bool> results = P.AskManyQuestions(P, P.HowManyQuestions(), maxRandNumber);
 
             Func<bool, bool> isTrue = x => x;
             int correctCount = results.Count(isTrue);
@@ -56,6 +51,26 @@ namespace MathsQuiz
 
         }
 
+        public List<bool> AskManyQuestions(Program P, int numberOfQuestions, int maxRandNumber)
+        {
+            List<bool> results = new List<bool>();
+            for (int questionNum = 1; questionNum <= numberOfQuestions; questionNum++)
+            {
+                int index = P.rnd.Next(P.potato.Count);
+                char op = P.potato.Keys.ElementAt(index);
+
+                int firstNum = P.rnd.Next(0, maxRandNumber);
+                int secondNum = P.rnd.Next(0, maxRandNumber);
+
+                double correctAnswer = CheckAnswer(op, firstNum, secondNum);
+
+                // Ask question, add result to list.
+                results.Add(P.AskQuestion(op, firstNum, secondNum));
+            }
+
+            return results;
+        }
+
         public bool AskQuestion(char op, int firstNum, int secondNum)
         {
             // Ask question!
@@ -67,16 +82,17 @@ namespace MathsQuiz
             if (answerIsInt)
             {
                 // Check if answer is correct or not!
-                bool correct = CheckAnswer(op, firstNum, secondNum, answer);
-                if (correct)
+                double correctAnswer = CheckAnswer(op, firstNum, secondNum);
+                if (correctAnswer==answer)
                 {
                     Console.WriteLine("You are correct!");
+                    return true;
                 }
                 else
                 {
-                    Console.WriteLine("Not correct!");
+                    Console.WriteLine("Not correct! The answer was: " + correctAnswer);
+                    return false;
                 }
-                return correct;
             }
             else
             {
@@ -86,21 +102,17 @@ namespace MathsQuiz
             }
         }
 
-        public bool CheckAnswer(char op, int firstNum, int secondNum, int answer)
+        public double CheckAnswer(char op, int firstNum, int secondNum)
         {
-            switch (op)
-            {
-                case '+':
-                    return (firstNum + secondNum) == answer;
-                case '-':
-                    return (firstNum - secondNum) == answer;
-                case '*':
-                    return (firstNum * secondNum) == answer;
-                case '/':
-                    return (firstNum / secondNum) == answer;
-                default:
-                    return false;
-            }
+
+            //potato.Add('+', (x, y) => x + y);
+            // Add other operators
+
+            Console.Write("DEBUG: ");
+            Console.WriteLine(potato[op](firstNum, secondNum));
+
+            return potato[op](firstNum, secondNum);
+
         }
     }
 }
