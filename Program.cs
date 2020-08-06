@@ -12,11 +12,12 @@ namespace MathsQuiz
 
         Dictionary<char, Func<double, double, double>> potato = new Dictionary<char, Func<double, double, double>>()
             {
-                /*{ '+', (x, y) => x + y },
+                { '+', (x, y) => x + y },
                 { '-', (x, y) => x - y },
-                { '*', (x, y) => x * y },*/
+                { '*', (x, y) => x * y },
                 { '/', (x, y) => x / y },
-                { '√', (x, y) => (int) Math.Pow(x, y) }
+                { '√', (x, y) => (int) Math.Sqrt(x) },
+                { '^', (x, y) => (int) Math.Pow(x, y) }
             };
 
         static void Main(string[] args)
@@ -63,9 +64,17 @@ namespace MathsQuiz
                 int secondNum = P.rnd.Next(0, maxRandNumber);
 
                 double correctAnswer = CheckAnswer(op, firstNum, secondNum);
+                if (correctAnswer != Math.Truncate(correctAnswer))
+                {
+                    // If correctAnswer would not be an integer, retry.
+                    numberOfQuestions++;
+                    // Console.WriteLine("DEBUG: SKIPPED.");
+                } else
+                {
+                    // Ask question, add result to list.
+                    results.Add(P.AskQuestion(op, firstNum, secondNum));
+                }
 
-                // Ask question, add result to list.
-                results.Add(P.AskQuestion(op, firstNum, secondNum));
             }
 
             return results;
@@ -81,16 +90,17 @@ namespace MathsQuiz
             bool answerIsInt = Int32.TryParse(Console.ReadLine(), out int answer);
             if (answerIsInt)
             {
+
                 // Check if answer is correct or not!
                 double correctAnswer = CheckAnswer(op, firstNum, secondNum);
                 if (correctAnswer==answer)
                 {
-                    Console.WriteLine("You are correct!");
+                    Console.WriteLine("You are correct!\n");
                     return true;
                 }
                 else
                 {
-                    Console.WriteLine("Not correct! The answer was: " + correctAnswer);
+                    Console.WriteLine("Not correct! The answer was: " + correctAnswer + "\n");
                     return false;
                 }
             }
@@ -108,8 +118,8 @@ namespace MathsQuiz
             //potato.Add('+', (x, y) => x + y);
             // Add other operators
 
-            Console.Write("DEBUG: ");
-            Console.WriteLine(potato[op](firstNum, secondNum));
+            //Console.Write("DEBUG: ");
+            //Console.WriteLine(potato[op](firstNum, secondNum));
 
             return potato[op](firstNum, secondNum);
 
