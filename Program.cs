@@ -9,33 +9,49 @@ namespace MathsQuiz
     class Program
     {
         Random rnd = new Random();
-
         Dictionary<char, Func<double, double, double>> potato = new Dictionary<char, Func<double, double, double>>()
             {
-                { '+', (x, y) => x + y },
-                { '-', (x, y) => x - y },
-                { '*', (x, y) => x * y },
-                { '/', (x, y) => x / y },
-                { '√', (x, y) => (int) Math.Sqrt(x) },
-                { '^', (x, y) => (int) Math.Pow(x, y) }
+                { '+', (oneNum, twoNum) => oneNum + twoNum },
+                { '-', (oneNum, twoNum) => oneNum - twoNum },
+                { '*', (oneNum, twoNum) => oneNum * twoNum },
+                { '/', (oneNum, twoNum) => oneNum / twoNum },
+                { '√', (oneNum, twoNum) => (int) Math.Sqrt(oneNum) },
+                { '^', (oneNum, twoNum) => (int) Math.Pow(oneNum, twoNum) }
             };
 
         static void Main(string[] args)
         {
-            // ENTRY POINT
-            int maxRandNumber = 10;
             Program P = new Program();
 
-            List<bool> results = P.AskManyQuestions(P, P.HowManyQuestions(), maxRandNumber);
-
+            int maxRandNumber = P.AskHowDifficultQuestions();
+            List<bool> results = P.AskQuestions(P, P.AskHowManyQuestions(), maxRandNumber);
+            
             Func<bool, bool> isTrue = x => x;
             int correctCount = results.Count(isTrue);
 
             Console.WriteLine("\nYou have gotten '" + correctCount + "' out of '" + results.Count + "' answers correct!");
-            Console.ReadLine(); // Don't quit instantly.
+            Console.ReadLine();
         }
 
-        public int HowManyQuestions()
+        public int AskHowDifficultQuestions()
+        {
+            Console.Write("How difficult would you like the questions to be? [Easy, medium or hard?] ");
+            switch (Console.ReadLine().ToLower())
+            {
+                case "easy":
+                    return 5;
+                case "medium":
+                    return 10;
+                case "hard":
+                    return 30;
+                default:
+                    AskHowDifficultQuestions();
+                    break;
+            }
+            return 5;
+        }
+
+        public int AskHowManyQuestions()
         {
             Console.Write("How many questions would you like to attempt? ");
             bool answerIsInt = Int32.TryParse(Console.ReadLine(), out int answer);
@@ -45,14 +61,13 @@ namespace MathsQuiz
             }
             else
             {
-                // Input was not valid, try again.
                 Console.WriteLine("Please type in an integer and press ENTER. Repeating question...");
-                return HowManyQuestions();
+                return AskHowManyQuestions();
             }
 
         }
 
-        public List<bool> AskManyQuestions(Program P, int numberOfQuestions, int maxRandNumber)
+        public List<bool> AskQuestions(Program P, int numberOfQuestions, int maxRandNumber)
         {
             List<bool> results = new List<bool>();
             for (int questionNum = 1; questionNum <= numberOfQuestions; questionNum++)
@@ -60,19 +75,16 @@ namespace MathsQuiz
                 int index = P.rnd.Next(P.potato.Count);
                 char op = P.potato.Keys.ElementAt(index);
 
-                int firstNum = P.rnd.Next(0, maxRandNumber);
-                int secondNum = P.rnd.Next(0, maxRandNumber);
+                int firstNum = P.rnd.Next(1, maxRandNumber);
+                int secondNum = P.rnd.Next(1, maxRandNumber);
 
                 double correctAnswer = CheckAnswer(op, firstNum, secondNum);
                 if (correctAnswer != Math.Truncate(correctAnswer))
                 {
-                    // If correctAnswer would not be an integer, retry.
                     numberOfQuestions++;
-                    // Console.WriteLine("DEBUG: SKIPPED.");
                 } else
                 {
-                    // Ask question, add result to list.
-                    results.Add(P.AskQuestion(op, firstNum, secondNum));
+                     results.Add(P.AskQuestion(op, firstNum, secondNum));
                 }
 
             }
@@ -82,16 +94,13 @@ namespace MathsQuiz
 
         public bool AskQuestion(char op, int firstNum, int secondNum)
         {
-            // Ask question!
             String s = String.Format("What is the answer to {0} {1} {2}? ", firstNum, op, secondNum);
             Console.Write(s);
 
-            // Receive answer, must be an integer.
             bool answerIsInt = Int32.TryParse(Console.ReadLine(), out int answer);
             if (answerIsInt)
             {
 
-                // Check if answer is correct or not!
                 double correctAnswer = CheckAnswer(op, firstNum, secondNum);
                 if (correctAnswer==answer)
                 {
@@ -106,7 +115,6 @@ namespace MathsQuiz
             }
             else
             {
-                // Input was not valid, try again.
                 Console.WriteLine("Please type in an integer and press ENTER. Repeating question...");
                 return AskQuestion(op, firstNum, secondNum);
             }
@@ -114,15 +122,7 @@ namespace MathsQuiz
 
         public double CheckAnswer(char op, int firstNum, int secondNum)
         {
-
-            //potato.Add('+', (x, y) => x + y);
-            // Add other operators
-
-            //Console.Write("DEBUG: ");
-            //Console.WriteLine(potato[op](firstNum, secondNum));
-
             return potato[op](firstNum, secondNum);
-
         }
     }
 }
