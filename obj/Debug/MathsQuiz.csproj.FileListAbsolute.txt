@@ -1,7 +1,0 @@
-C:\Users\evie.snuggle\source\repos\MathsQuiz\MathsQuiz\bin\Debug\MathsQuiz.exe.config
-C:\Users\evie.snuggle\source\repos\MathsQuiz\MathsQuiz\bin\Debug\MathsQuiz.exe
-C:\Users\evie.snuggle\source\repos\MathsQuiz\MathsQuiz\bin\Debug\MathsQuiz.pdb
-C:\Users\evie.snuggle\source\repos\MathsQuiz\MathsQuiz\obj\Debug\MathsQuiz.csprojAssemblyReference.cache
-C:\Users\evie.snuggle\source\repos\MathsQuiz\MathsQuiz\obj\Debug\MathsQuiz.csproj.CoreCompileInputs.cache
-C:\Users\evie.snuggle\source\repos\MathsQuiz\MathsQuiz\obj\Debug\MathsQuiz.exe
-C:\Users\evie.snuggle\source\repos\MathsQuiz\MathsQuiz\obj\Debug\MathsQuiz.pdb
