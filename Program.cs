@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace MathsQuiz
-{
+namespace MathsQuiz { 
     class Program
     {
         Random rnd = new Random();
-        Dictionary<char, Func<double, double, double>> potato = new Dictionary<char, Func<double, double, double>>()
+        Dictionary<char, Func<double, double, double>> potato = 
+            new Dictionary<char, Func<double, double, double>>()
             {
                 { '+', (oneNum, twoNum) => oneNum + twoNum },
                 { '-', (oneNum, twoNum) => oneNum - twoNum },
@@ -21,12 +21,12 @@ namespace MathsQuiz
 
         static void Main(string[] args)
         {
-            Program P = new Program();
+            Program P = new Program(); // This is bad! See issue #11. :(
 
             int maxRandNumber = P.AskHowDifficultQuestions();
             List<bool> results = P.AskQuestions(P, P.AskHowManyQuestions(), maxRandNumber);
             
-            Func<bool, bool> isTrue = x => x;
+            Func<bool, bool> isTrue = result => result;
             int correctCount = results.Count(isTrue);
 
             Console.WriteLine("\nYou have gotten '" + correctCount + "' out of '" + results.Count + "' answers correct!");
@@ -78,7 +78,7 @@ namespace MathsQuiz
                 int firstNum = P.rnd.Next(1, maxRandNumber);
                 int secondNum = P.rnd.Next(1, maxRandNumber);
 
-                double correctAnswer = CheckAnswer(op, firstNum, secondNum);
+                double correctAnswer = GetCorrectAnswer(op, firstNum, secondNum);
                 if (correctAnswer != Math.Truncate(correctAnswer))
                 {
                     numberOfQuestions++;
@@ -94,14 +94,14 @@ namespace MathsQuiz
 
         public bool AskQuestion(char op, int firstNum, int secondNum)
         {
-            String s = String.Format("What is the answer to {0} {1} {2}? ", firstNum, op, secondNum);
-            Console.Write(s);
+            string questionText = $"What is the answer to {firstNum} {op} {secondNum}? "; // Much nicer, string interpolation! Closes #12. 
+            Console.Write(questionText);
 
             bool answerIsInt = Int32.TryParse(Console.ReadLine(), out int answer);
             if (answerIsInt)
             {
 
-                double correctAnswer = CheckAnswer(op, firstNum, secondNum);
+                double correctAnswer = GetCorrectAnswer(op, firstNum, secondNum);
                 if (correctAnswer==answer)
                 {
                     Console.WriteLine("You are correct!\n");
@@ -120,7 +120,7 @@ namespace MathsQuiz
             }
         }
 
-        public double CheckAnswer(char op, int firstNum, int secondNum)
+        public double GetCorrectAnswer(char op, int firstNum, int secondNum)
         {
             return potato[op](firstNum, secondNum);
         }
