@@ -4,7 +4,7 @@ Produce a maths quiz app.
 
 ## Non-Functional Requirements:
 
-- Should be created as a C# Console App (using .NET Framework)
+- Should be created as a C# Web App (using ASP.NET Web Forms Framework)
 - Clean code
 - Ensure there are clear instructions for the user
 
