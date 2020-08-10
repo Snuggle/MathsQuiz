@@ -24,11 +24,23 @@ namespace SimpleWebMathsQuiz
 
             if (IsPostBack)
             {
-                question.InnerText = $"The answer you had provided to '{Request.Form["firstNumber"]} {Request.Form["operators"]} {Request.Form["secondNumber"]}' was: {Request.Form["text"]}";
+                int.TryParse(Request.Form["firstNumber"], out firstNum);
+                int.TryParse(Request.Form["secondNumber"], out secondNum);
+                char oper = Request.Form["operators"][0];
+
+                double correctAnswer = test.GetCorrectAnswer(oper, firstNum, secondNum);
+
+                int.TryParse(Request.Form["text"], out int userAnswer);
+
+                if ( userAnswer == correctAnswer ) {
+                    answerText.InnerText = $"The answer you had provided to '{Request.Form["firstNumber"]} {Request.Form["operators"]} {Request.Form["secondNumber"]}'" +
+                        $" was: {Request.Form["text"]}. YAY, CORRECT! ✅🎉";
+                } else
+                {
+                    answerText.InnerText = $"The answer you had provided to '{Request.Form["firstNumber"]} {Request.Form["operators"]} {Request.Form["secondNumber"]}'" +
+                        $" was: {Request.Form["text"]}. Sadly, you were wrong... It was {correctAnswer}! ❌";
+                }
             }
         }
-
-
-        
     }
 }

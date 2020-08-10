@@ -9,7 +9,8 @@
 <body>
     <h1>Simple Maths Quiz</h1>
     <form id="form1" method="post" runat="server">   
-        <p id="question" runat="server"></p>
+        <h3 id="answerText" runat="server"></h3>
+        <ul><li><p id="question" runat="server"></p></li></ul>
         <input type="text" name="text" value="" />
 
         <input type="hidden" name="operators" id="operators" runat="server" />
