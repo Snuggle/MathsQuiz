@@ -20,15 +20,6 @@ namespace MathsQuiz {
         static void Main(string[] args)
         {
             Program P = new Program(); // This is bad! See issue #11. :(
-
-            int maxRandNumber = P.AskHowDifficultQuestions();
-            List<bool> results = P.AskQuestions(P, P.AskHowManyQuestions(), maxRandNumber);
-            
-            Func<bool, bool> isTrue = result => result;
-            int correctCount = results.Count(isTrue);
-
-            Console.WriteLine("\nYou have gotten '" + correctCount + "' out of '" + results.Count + "' answers correct!");
-            Console.ReadLine();
         }
 
         public int AskHowDifficultQuestions()
@@ -65,29 +56,16 @@ namespace MathsQuiz {
 
         }
 
-        public List<bool> AskQuestions(Program P, int numberOfQuestions, int maxRandNumber)
+        public Tuple<string, int, int, char> Web_AskQuestion(Program P, int maxRandNumber)
         {
-            List<bool> results = new List<bool>();
-            for (int questionNum = 1; questionNum <= numberOfQuestions; questionNum++)
-            {
                 int index = P.rnd.Next(P.potato.Count);
                 char op = P.potato.Keys.ElementAt(index);
 
                 int firstNum = P.rnd.Next(1, maxRandNumber);
                 int secondNum = P.rnd.Next(1, maxRandNumber);
 
-                double correctAnswer = GetCorrectAnswer(op, firstNum, secondNum);
-                if (correctAnswer != Math.Truncate(correctAnswer))
-                {
-                    numberOfQuestions++;
-                } else
-                {
-                     results.Add(P.AskQuestion(op, firstNum, secondNum));
-                }
-
-            }
-
-            return results;
+                string questionText = $"What is the answer to {firstNum} {op} {secondNum}? "; // Much nicer, string interpolation! Closes #12. 
+            return Tuple.Create(questionText, firstNum, secondNum, op);
         }
 
         public bool AskQuestion(char op, int firstNum, int secondNum)
