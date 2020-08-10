@@ -24,6 +24,15 @@ namespace SimpleWebMathsQuiz
         protected global::System.Web.UI.HtmlControls.HtmlForm form1;
 
         /// <summary>
+        /// stateDebug control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl stateDebug;
+
+        /// <summary>
         /// answerText control.
         /// </summary>
         /// <remarks>
@@ -67,5 +76,14 @@ namespace SimpleWebMathsQuiz
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.HtmlControls.HtmlInputHidden firstNumber;
+
+        /// <summary>
+        /// UserAnswers control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlInputHidden UserAnswers;
     }
 }
