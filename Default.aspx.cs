@@ -14,7 +14,7 @@ namespace SimpleWebMathsQuiz
         public int FirstNumber { get; set; }
         public int SecondNumber { get; set; }
         public int Operatororor { get; set; }
-        public int AnswerText { get; set; }
+        public string AnswerText { get; set; }
     }
 
     public class UserResults
@@ -102,13 +102,19 @@ namespace SimpleWebMathsQuiz
 
         public SubmittedData CaptureSubmittedData()
         {
+            int.TryParse(Request.Form["firstNumber"], out int pFirstNumber);
+            int.TryParse(Request.Form["secondNumber"], out int pSecondNumber);
+            int.TryParse(Request.Form["operators"], out int pOperatororor);
+
+            string pAnswerText = Request.Form["text"];
+
             SubmittedData something = new SubmittedData
             {
-                FirstNumber = int.Parse(Request.Form["firstNumber"]),
-                SecondNumber = int.Parse(Request.Form["secondNumber"]),
-                Operatororor = int.Parse(Request.Form["operators"]),
+                FirstNumber = pFirstNumber,
+                SecondNumber = pSecondNumber,
+                Operatororor = pOperatororor,
 
-                AnswerText = int.Parse(Request.Form["text"])
+                AnswerText = pAnswerText
             };
 
             return something;
@@ -144,12 +150,13 @@ namespace SimpleWebMathsQuiz
             {
                 int.TryParse(Request.Form["text"], out int HowManyQuestions);
                 HowManyQuestions--;
-                UserAnswers.Attributes["value"] = "{\"userAnswers\": [],\"userResults\": [],\"HowManyQuestions\":" + HowManyQuestions + "}";
+                UserAnswers.Attributes["value"] = "{\"UsersAnswers\": [],\"UsersResults\": [],\"HowManyQuestions\":" + HowManyQuestions + "}";
 
             }
             else // The user has submitted answers
             {
                 UserResults userState = JsonSerializer.Deserialize<UserResults>(Request.Form["UserAnswers"]);
+
 
                 ProcessQuestion(userState);
             }
