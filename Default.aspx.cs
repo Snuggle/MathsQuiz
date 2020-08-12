@@ -4,11 +4,26 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using ;
 using System.Text.Json;
+using System.Web.UI.HtmlControls;
 
-namespace SimpleWeb
+namespace SimpleWebMathsQuiz
 {
+    public class SubmittedData
+    {
+        public int firstNumber { get; set; }
+        public int secondNumber { get; set; }
+        public int operatororor { get; set; }
+        public int answerText { get; set; }
+    }
+
+    public class UserResults
+    {
+        public IList<int> userAnswers { get; set; }
+        public IList<bool> userResults { get; set; }
+        public int HowManyQuestions { get; set; }
+    }
+
     public class Quiz
     {
         Random rnd = new Random();
@@ -22,13 +37,6 @@ namespace SimpleWeb
                 { '√', (oneNum, twoNum) => (int) Math.Sqrt(oneNum) },
                 { '^', (oneNum, twoNum) => (int) Math.Pow(oneNum, twoNum) }
             };
-
-        public class UserResults
-        {
-            public IList<int> userAnswers { get; set; }
-            public IList<bool> userResults { get; set; }
-            public int HowManyQuestions { get; set; }
-        }
 
         public double GetCorrectAnswer(char op, int firstNum, int secondNum)
         {
@@ -47,13 +55,38 @@ namespace SimpleWeb
             return Tuple.Create(questionText, firstNum, secondNum, op);
         }
 
-        public Tuple<int, int> GetResultsFromPage(UserResults userState)
+
+        public void AskQuestion(HtmlGenericControl question, HtmlInputHidden firstNumber, HtmlInputHidden secondNumber, HtmlInputHidden operators)
+        {
+            (string questionText, int firstNum, int secondNum, char op) = Web_AskQuestion(10);
+            question.InnerText = questionText;
+            firstNumber.Attributes["value"] = firstNum.ToString();
+            secondNumber.Attributes["value"] = secondNum.ToString();
+            operators.Attributes["value"] = op.ToString();
+        }
+
+        public string IsTheUserCorrect(Tuple<int, int> results, string text, SubmittedData something)
+        {
+            (int userAnswer, int correctAnswer) = results;
+            if (userAnswer.Equals(correctAnswer))
+            {
+                return $"The answer you had provided to '{something.firstNumber} {something.operatororor} {something.secondNumber}' was: {text}. YAY, CORRECT! ✅🎉";
+            }
+            return $"The answer you had provided to '{something.firstNumber} {something.operatororor} {something.secondNumber}' was: {text}. Sadly, you were wrong... It was {correctAnswer}! ❌";
+        }
+    }
+
+    public partial class Default : System.Web.UI.Page
+    {
+        Quiz quiz = new Quiz();
+
+        public Tuple<int, int> GetResultsFromPage(UserResults userState, HtmlGenericControl stateDebug)
         {
             int.TryParse(Request.Form["firstNumber"], out int firstNum);
             int.TryParse(Request.Form["secondNumber"], out int secondNum);
             char oper = Request.Form["operators"][0];
 
-            int correctAnswer = (int)GetCorrectAnswer(oper, firstNum, secondNum);
+            int correctAnswer = (int)quiz.GetCorrectAnswer(oper, firstNum, secondNum);
 
             int.TryParse(Request.Form["text"], out int userAnswer);
 
@@ -67,25 +100,41 @@ namespace SimpleWeb
             return Tuple.Create(userAnswer, correctAnswer);
         }
 
-        public void AskQuestion(question, firstNumber, secondNumber, operators)
+        public SubmittedData CaptureSubmittedData()
         {
-            (string questionText, int firstNum, int secondNum, char op) = Web_AskQuestion(, 10);
-            question.InnerText = questionText;
-            firstNumber.Attributes["value"] = firstNum.ToString();
-            secondNumber.Attributes["value"] = secondNum.ToString();
-            operators.Attributes["value"] = op.ToString();
+            SubmittedData something = new SubmittedData();
+            something.firstNumber = int.Parse(Request.Form["firstNumber"]);
+            something.secondNumber = int.Parse(Request.Form["secondNumber"]);
+            something.operatororor = int.Parse(Request.Form["operators"]);
+
+            something.answerText = int.Parse(Request.Form["text"]);
+
+            return something;
         }
 
-        public string IsTheUserCorrect(Tuple<int, int> results)
+        public void ProcessQuestion(UserResults userState)
         {
-            (int userAnswer, int correctAnswer) = results;
-            if (userAnswer.Equals(correctAnswer))
+            if (userState.HowManyQuestions > 0)
             {
-                return $"The answer you had provided to '{Request.Form["firstNumber"]} {Request.Form["operators"]} {Request.Form["secondNumber"]}' was: {Request.Form["text"]}. YAY, CORRECT! ✅🎉";
+                Tuple<int, int> results = GetResultsFromPage(userState, stateDebug);
+
+                SubmittedData UserSubmittedData = CaptureSubmittedData();
+
+                answerText.InnerText = quiz.IsTheUserCorrect(results, Request.Form["text"], UserSubmittedData);
+
+                userState.HowManyQuestions--;
+                UserAnswers.Attributes["value"] = JsonSerializer.Serialize(userState);
             }
-            return $"The answer you had provided to '{Request.Form["firstNumber"]} {Request.Form["operators"]} {Request.Form["secondNumber"]}' was: {Request.Form["text"]}. Sadly, you were wrong... It was {correctAnswer}! ❌";
+            else
+            {
+                GetResultsFromPage(userState, stateDebug);
+
+                Func<bool, bool> isTrue = x => x;
+                int correctCount = userState.userResults.Count(isTrue);
+                question.InnerText = "Congratulations! You have finished the quiz with " + correctCount + " out of " + (userState.userResults.Count()) + " correct! ";
+                answerText.InnerText = "🎉🎉🎉";
+            }
         }
-    }
 
         public void HandleButtonClick()
         {
@@ -106,13 +155,12 @@ namespace SimpleWeb
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            Quiz Quiz = new Quiz();
 
             question.InnerText = "How many questions would you like to attempt?";
 
             if (IsPostBack) // Button has been clicked
             {
-                Quiz.AskQuestion();
+                quiz.AskQuestion(question, firstNumber, secondNumber, operators);
 
                 HandleButtonClick();
             }
