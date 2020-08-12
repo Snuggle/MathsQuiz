@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace MathsQuiz { 
-    class Program
+    public class Program
     {
         Random rnd = new Random();
         Dictionary<char, Func<double, double, double>> potato = 

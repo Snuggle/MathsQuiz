@@ -11,53 +11,89 @@ namespace SimpleWebMathsQuiz
 {
     public partial class Default : System.Web.UI.Page
     {
-
         public class UserResults
         {
             public IList<int> userAnswers { get; set; }
             public IList<bool> userResults { get; set; }
-
+            public int HowManyQuestions { get; set; }
         }
-        protected void Page_Load(object sender, EventArgs e)
-        {
-            Program test = new MathsQuiz.Program();
 
-            (string questionText, int firstNum, int secondNum, char op) = test.Web_AskQuestion(test, 10);
+        public Tuple<int, int> GetResultsFromPage(Program MathsQuiz, UserResults userState)
+        {
+            int.TryParse(Request.Form["firstNumber"], out int firstNum);
+            int.TryParse(Request.Form["secondNumber"], out int secondNum);
+            char oper = Request.Form["operators"][0];
+
+            int correctAnswer = (int)MathsQuiz.GetCorrectAnswer(oper, firstNum, secondNum);
+
+            int.TryParse(Request.Form["text"], out int userAnswer);
+
+            userState.userAnswers.Add(userAnswer);
+            userState.userResults.Add(userAnswer == correctAnswer);
+
+            string debugString = JsonSerializer.Serialize(userState);
+
+            stateDebug.InnerHtml = debugString + " ~ Questions Remaining: " +  userState.HowManyQuestions;
+
+            return Tuple.Create(userAnswer, correctAnswer);
+        }
+
+        public void AskQuestion(Program MathsQuiz)
+        {
+            (string questionText, int firstNum, int secondNum, char op) = MathsQuiz.Web_AskQuestion(MathsQuiz, 10);
             question.InnerText = questionText;
             firstNumber.Attributes["value"] = firstNum.ToString();
             secondNumber.Attributes["value"] = secondNum.ToString();
             operators.Attributes["value"] = op.ToString();
+        }
 
-            if (IsPostBack)
+        public string IsTheUserCorrect(Tuple<int, int> results)
+        {
+            (int userAnswer, int correctAnswer) = results;
+            if (userAnswer.Equals(correctAnswer))
             {
-                int.TryParse(Request.Form["firstNumber"], out firstNum);
-                int.TryParse(Request.Form["secondNumber"], out secondNum);
-                char oper = Request.Form["operators"][0];
+                return $"The answer you had provided to '{Request.Form["firstNumber"]} {Request.Form["operators"]} {Request.Form["secondNumber"]}' was: {Request.Form["text"]}. YAY, CORRECT! ✅🎉";
+            }
+            return $"The answer you had provided to '{Request.Form["firstNumber"]} {Request.Form["operators"]} {Request.Form["secondNumber"]}' was: {Request.Form["text"]}. Sadly, you were wrong... It was {correctAnswer}! ❌";
+        }
 
-                double correctAnswer = test.GetCorrectAnswer(oper, firstNum, secondNum);
+        protected void Page_Load(object sender, EventArgs e)
+        {
+            Program MathsQuiz = new MathsQuiz.Program();
 
-                int.TryParse(Request.Form["text"], out int userAnswer);
+            question.InnerText = "How many questions would you like to attempt?";
 
-                UserResults userState = JsonSerializer.Deserialize<UserResults>(Request.Form["UserAnswers"]);
-                userState.userAnswers.Add(userAnswer);
+            if (IsPostBack) // Button has been clicked
+            {
+                AskQuestion(MathsQuiz);
 
-
-                if ( userAnswer == correctAnswer ) {
-                    answerText.InnerText = $"The answer you had provided to '{Request.Form["firstNumber"]} {Request.Form["operators"]} {Request.Form["secondNumber"]}'" +
-                        $" was: {Request.Form["text"]}. YAY, CORRECT! ✅🎉";
-                    stateDebug.InnerText = String.Join(",", userState.userAnswers);
-                    userState.userResults.Add(true);
-                }
-                else
+                if (UserAnswers.Attributes["value"]==null) // If no maths questions have been asked yet.
                 {
-                    answerText.InnerText = $"The answer you had provided to '{Request.Form["firstNumber"]} {Request.Form["operators"]} {Request.Form["secondNumber"]}'" +
-                        $" was: {Request.Form["text"]}. Sadly, you were wrong... It was {correctAnswer}! ❌";
-                    stateDebug.InnerText = String.Join(",", userState.userAnswers);
-                    userState.userResults.Add(false);
+                    int.TryParse(Request.Form["text"], out int HowManyQuestions);
+                    HowManyQuestions--;
+                    UserAnswers.Attributes["value"] = "{\"userAnswers\": [],\"userResults\": [],\"HowManyQuestions\":"+HowManyQuestions+"}";
+                } else // The user has submitted answers
+                {
+                    UserResults userState = JsonSerializer.Deserialize<UserResults>(Request.Form["UserAnswers"]);
+
+                    if (userState.HowManyQuestions > 0)
+                    {
+                        Tuple<int, int> results = GetResultsFromPage(MathsQuiz, userState);
+
+                        answerText.InnerText = IsTheUserCorrect(results);
+
+                        userState.HowManyQuestions--;
+                        UserAnswers.Attributes["value"] = JsonSerializer.Serialize(userState);
+                    } else
+                    {
+                        GetResultsFromPage(MathsQuiz, userState);
+
+                        Func<bool, bool> isTrue = x => x;
+                        int correctCount = userState.userResults.Count(isTrue);
+                        question.InnerText = "Congratulations! You have finished the quiz with " + correctCount + " out of " + (userState.userResults.Count()) + " correct! ";
+                        answerText.InnerText = "🎉🎉🎉";
+                    }
                 }
-
-                UserAnswers.Attributes["value"] = JsonSerializer.Serialize(userState);
-
             }
         }
     }

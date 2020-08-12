@@ -9,7 +9,7 @@
 <body>
     <h1>Simple Maths Quiz</h1>
     <form id="form1" method="post" runat="server">   
-        <p style="display: inline">(Debug) Your given answers: </p><p style="display: inline" id="stateDebug" runat="server"></p>
+        <p style="display: inline">(Debug) Your user state: </p><p style="display: inline" id="stateDebug" runat="server"></p>
         <p id="answerText" runat="server"></p>
         <ul><li><p id="question" runat="server"></p></li></ul>
         <input type="text" name="text" value="" />
@@ -19,7 +19,7 @@
         <input type="hidden" name="secondNumber" id="secondNumber" runat="server" />
 
         <input type="hidden" name="firstNumber" id="firstNumber" runat="server" />
-        <input type="hidden" name="UserAnswers" id="UserAnswers" value='{"userAnswers": [],"userResults": []}' runat="server" />
+        <input type="hidden" name="UserAnswers" id="UserAnswers" value='' runat="server" />
 
 
         <br/>
