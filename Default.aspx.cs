@@ -87,8 +87,23 @@ namespace SimpleWeb
         }
     }
 
-    public partial class Default : System.Web.UI.Page
-    { 
+        public void HandleButtonClick()
+        {
+            if (UserAnswers.Attributes["value"] == null) // If no maths questions have been asked yet.
+            {
+                int.TryParse(Request.Form["text"], out int HowManyQuestions);
+                HowManyQuestions--;
+                UserAnswers.Attributes["value"] = "{\"userAnswers\": [],\"userResults\": [],\"HowManyQuestions\":" + HowManyQuestions + "}";
+
+            }
+            else // The user has submitted answers
+            {
+                UserResults userState = JsonSerializer.Deserialize<UserResults>(Request.Form["UserAnswers"]);
+
+                ProcessQuestion(userState);
+            }
+        }
+
         protected void Page_Load(object sender, EventArgs e)
         {
             Quiz Quiz = new Quiz();
@@ -99,34 +114,7 @@ namespace SimpleWeb
             {
                 Quiz.AskQuestion();
 
-                if (UserAnswers.Attributes["value"]==null) // If no maths questions have been asked yet.
-                {
-                    int.TryParse(Request.Form["text"], out int HowManyQuestions);
-                    HowManyQuestions--;
-                    UserAnswers.Attributes["value"] = "{\"userAnswers\": [],\"userResults\": [],\"HowManyQuestions\":"+HowManyQuestions+"}";
-
-                } else // The user has submitted answers
-                {
-                    Quiz.UserResults userState = JsonSerializer.Deserialize<Quiz.UserResults>(Request.Form["UserAnswers"]);
-
-                    if (userState.HowManyQuestions > 0)
-                    {
-                        Tuple<int, int> results = Quiz.GetResultsFromPage(userState);
-
-                        answerText.InnerText = Quiz.IsTheUserCorrect(results);
-
-                        userState.HowManyQuestions--;
-                        UserAnswers.Attributes["value"] = JsonSerializer.Serialize(userState);
-                    } else
-                    {
-                        Quiz.GetResultsFromPage(userState);
-
-                        Func<bool, bool> isTrue = x => x;
-                        int correctCount = userState.userResults.Count(isTrue);
-                        question.InnerText = "Congratulations! You have finished the quiz with " + correctCount + " out of " + (userState.userResults.Count()) + " correct! ";
-                        answerText.InnerText = "🎉🎉🎉";
-                    }
-                }
+                HandleButtonClick();
             }
         }
     }
