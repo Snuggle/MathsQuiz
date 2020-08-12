@@ -11,23 +11,23 @@ namespace SimpleWebMathsQuiz
 {
     public class SubmittedData
     {
-        public int firstNumber { get; set; }
-        public int secondNumber { get; set; }
-        public int operatororor { get; set; }
-        public int answerText { get; set; }
+        public int FirstNumber { get; set; }
+        public int SecondNumber { get; set; }
+        public int Operatororor { get; set; }
+        public int AnswerText { get; set; }
     }
 
     public class UserResults
     {
-        public IList<int> userAnswers { get; set; }
-        public IList<bool> userResults { get; set; }
+        public IList<int> UsersAnswers { get; set; }
+        public IList<bool> UsersResults { get; set; }
         public int HowManyQuestions { get; set; }
     }
 
     public class Quiz
     {
-        Random rnd = new Random();
-        Dictionary<char, Func<double, double, double>> potato =
+        private readonly Random rnd = new Random();
+        private readonly Dictionary<char, Func<double, double, double>> potato =
             new Dictionary<char, Func<double, double, double>>()
             {
                 { '+', (oneNum, twoNum) => oneNum + twoNum },
@@ -70,15 +70,15 @@ namespace SimpleWebMathsQuiz
             (int userAnswer, int correctAnswer) = results;
             if (userAnswer.Equals(correctAnswer))
             {
-                return $"The answer you had provided to '{something.firstNumber} {something.operatororor} {something.secondNumber}' was: {text}. YAY, CORRECT! ✅🎉";
+                return $"The answer you had provided to '{something.FirstNumber} {something.Operatororor} {something.SecondNumber}' was: {text}. YAY, CORRECT! ✅🎉";
             }
-            return $"The answer you had provided to '{something.firstNumber} {something.operatororor} {something.secondNumber}' was: {text}. Sadly, you were wrong... It was {correctAnswer}! ❌";
+            return $"The answer you had provided to '{something.FirstNumber} {something.Operatororor} {something.SecondNumber}' was: {text}. Sadly, you were wrong... It was {correctAnswer}! ❌";
         }
     }
 
     public partial class Default : System.Web.UI.Page
     {
-        Quiz quiz = new Quiz();
+        private readonly Quiz quiz = new Quiz();
 
         public Tuple<int, int> GetResultsFromPage(UserResults userState, HtmlGenericControl stateDebug)
         {
@@ -90,8 +90,8 @@ namespace SimpleWebMathsQuiz
 
             int.TryParse(Request.Form["text"], out int userAnswer);
 
-            userState.userAnswers.Add(userAnswer);
-            userState.userResults.Add(userAnswer == correctAnswer);
+            userState.UsersAnswers.Add(userAnswer);
+            userState.UsersResults.Add(userAnswer == correctAnswer);
 
             string debugString = JsonSerializer.Serialize(userState);
 
@@ -102,12 +102,14 @@ namespace SimpleWebMathsQuiz
 
         public SubmittedData CaptureSubmittedData()
         {
-            SubmittedData something = new SubmittedData();
-            something.firstNumber = int.Parse(Request.Form["firstNumber"]);
-            something.secondNumber = int.Parse(Request.Form["secondNumber"]);
-            something.operatororor = int.Parse(Request.Form["operators"]);
+            SubmittedData something = new SubmittedData
+            {
+                FirstNumber = int.Parse(Request.Form["firstNumber"]),
+                SecondNumber = int.Parse(Request.Form["secondNumber"]),
+                Operatororor = int.Parse(Request.Form["operators"]),
 
-            something.answerText = int.Parse(Request.Form["text"]);
+                AnswerText = int.Parse(Request.Form["text"])
+            };
 
             return something;
         }
@@ -129,9 +131,9 @@ namespace SimpleWebMathsQuiz
             {
                 GetResultsFromPage(userState, stateDebug);
 
-                Func<bool, bool> isTrue = x => x;
-                int correctCount = userState.userResults.Count(isTrue);
-                question.InnerText = "Congratulations! You have finished the quiz with " + correctCount + " out of " + (userState.userResults.Count()) + " correct! ";
+                bool isTrue(bool x) => x;
+                int correctCount = userState.UsersResults.Count(isTrue);
+                question.InnerText = "Congratulations! You have finished the quiz with " + correctCount + " out of " + (userState.UsersResults.Count()) + " correct! ";
                 answerText.InnerText = "🎉🎉🎉";
             }
         }
