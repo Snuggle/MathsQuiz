@@ -13,7 +13,7 @@ namespace SimpleWebMathsQuiz
     {
         public int FirstNumber { get; set; }
         public int SecondNumber { get; set; }
-        public int Operatororor { get; set; }
+        public char Operatororor { get; set; }
         public string AnswerText { get; set; }
     }
 
@@ -38,7 +38,7 @@ namespace SimpleWebMathsQuiz
             return potato[op](firstNum, secondNum);
         }
 
-        public Tuple<string, int, int, char> Web_AskQuestion(int maxRandNumber)
+        public Tuple<string, int, int, char> AskQuestion(int maxRandNumber)
         {
             int index = rnd.Next(potato.Count);
             char op = potato.Keys.ElementAt(index);
@@ -55,24 +55,14 @@ namespace SimpleWebMathsQuiz
             return Tuple.Create(questionText, firstNum, secondNum, op);
         }
 
-
-        public void AskQuestion(HtmlGenericControl question, HtmlInputHidden firstNumber, HtmlInputHidden secondNumber, HtmlInputHidden operators)
-        {
-            (string questionText, int firstNum, int secondNum, char op) = Web_AskQuestion(10);
-            question.InnerText = questionText;
-            firstNumber.Attributes["value"] = firstNum.ToString();
-            secondNumber.Attributes["value"] = secondNum.ToString();
-            operators.Attributes["value"] = op.ToString();
-        }
-
         public string IsTheUserCorrect(Tuple<int, int> results, SubmittedData something)
         {
             (int userAnswer, int correctAnswer) = results;
             if (userAnswer.Equals(correctAnswer))
             {
-                return $"The answer you had provided to '{something.FirstNumber} {something.Operatororor} {something.SecondNumber}' was: {userAnswer}. YAY, CORRECT! ✅🎉";
+                return $"YAY, CORRECT! ✅🎉";
             }
-            return $"The answer you had provided to '{something.FirstNumber} {something.Operatororor} {something.SecondNumber}' was: {userAnswer}. Sadly, you were wrong... It was {correctAnswer}! ❌";
+            return $"Wrong. '{something.FirstNumber} {something.Operatororor} {something.SecondNumber}' is {correctAnswer}! ❌";
         }
     }
 
@@ -91,9 +81,9 @@ namespace SimpleWebMathsQuiz
 
             userState.UsersAnswers.Add(userAnswer);
             userState.UsersResults.Add(userAnswer == correctAnswer);
-            string debugString = JsonSerializer.Serialize(userState);
 
-            stateDebug.InnerHtml = debugString + " ~ Questions Remaining: " + userState.HowManyQuestions;
+            stateDebug.InnerHtml = JsonSerializer.Serialize(userState);
+            QuestionsRemaining.InnerText = "Questions Remaining: " + userState.HowManyQuestions;
 
             return Tuple.Create(userAnswer, correctAnswer);
         }
@@ -102,7 +92,6 @@ namespace SimpleWebMathsQuiz
         {
             int.TryParse(Request.Form["firstNumber"], out int pFirstNumber);
             int.TryParse(Request.Form["secondNumber"], out int pSecondNumber);
-            int.TryParse(Request.Form["operators"], out int pOperatororor);
 
             string pAnswerText = Request.Form["text"];
 
@@ -110,11 +99,20 @@ namespace SimpleWebMathsQuiz
             {
                 FirstNumber = pFirstNumber,
                 SecondNumber = pSecondNumber,
-                Operatororor = pOperatororor,
+                Operatororor = Request.Form["operators"][0],
                 AnswerText = pAnswerText
             };
 
             return something;
+        }
+
+        public void Web_AskQuestion()
+        {
+            (string questionText, int firstNum, int secondNum, char op) = quiz.AskQuestion(10);
+            question.InnerText = questionText;
+            firstNumber.Attributes["value"] = firstNum.ToString();
+            secondNumber.Attributes["value"] = secondNum.ToString();
+            operators.Attributes["value"] = op.ToString();
         }
 
         public void ProcessQuestion(UserResults userState)
@@ -173,7 +171,7 @@ namespace SimpleWebMathsQuiz
 
             if (IsPostBack) // Button has been clicked
             {
-                quiz.AskQuestion(question, firstNumber, secondNumber, operators);
+                Web_AskQuestion();
 
                 HandleButtonClick();
             }
