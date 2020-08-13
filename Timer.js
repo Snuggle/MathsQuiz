@@ -5,7 +5,7 @@
         var timeInterval = '10000';
         var remainingSeconds = (timeInterval / 1000);
         var timeInterval = setInterval(function () {
-            document.getElementById('divRemainingTime').innerText = "You have " + --remainingSeconds + " seconds to answer this question!";
+            document.getElementById('divRemainingTime').innerText = --remainingSeconds;
 
             if (remainingSeconds <= 0) {
                 window.location.href = "Default.aspx";

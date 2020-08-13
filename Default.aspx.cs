@@ -9,19 +9,16 @@ using System.Web.UI.HtmlControls;
 
 namespace SimpleWebMathsQuiz
 {
-    public class SubmittedData
-    {
-        public int FirstNumber { get; set; }
-        public int SecondNumber { get; set; }
-        public char Operatororor { get; set; }
-        public string AnswerText { get; set; }
-    }
-
     public class UserResults
     {
-        public IList<int> UsersAnswers { get; set; }
-        public IList<bool> UsersResults { get; set; }
+        public List<int> UsersAnswers { get; set; }
+        public List<bool> UsersResults { get; set; }
         public int HowManyQuestions { get; set; }
+
+            public int prevFirstNumber { get; set; }
+            public int prevSecondNumber { get; set; }
+            public char prevOperator { get; set; }
+            public int prevAnswerText { get; set; }
     }
 
     public class Quiz
@@ -30,12 +27,22 @@ namespace SimpleWebMathsQuiz
         private readonly Dictionary<char, Func<double, double, double>> potato =
             new Dictionary<char, Func<double, double, double>>()
             {
-                { '/', (oneNum, twoNum) => oneNum / twoNum }
+                { '+', (oneNum, twoNum) => oneNum + twoNum },
+                { '-', (oneNum, twoNum) => oneNum - twoNum },
+                { '*', (oneNum, twoNum) => oneNum * twoNum },
+                { '/', (oneNum, twoNum) => oneNum / twoNum },
+                { '√', (oneNum, twoNum) => (int) Math.Sqrt(oneNum) },
+                { '^', (oneNum, twoNum) => (int) Math.Pow(oneNum, twoNum) }
             };
 
         public double GetCorrectAnswer(char op, int firstNum, int secondNum)
         {
-            return potato[op](firstNum, secondNum);
+            try
+            {
+                return potato[op](firstNum, secondNum);
+            } catch {
+                return 999;
+            }
         }
 
         public Tuple<string, int, int, char> AskQuestion(int maxRandNumber)
@@ -55,14 +62,13 @@ namespace SimpleWebMathsQuiz
             return Tuple.Create(questionText, firstNum, secondNum, op);
         }
 
-        public string IsTheUserCorrect(Tuple<int, int> results, SubmittedData something)
+        public string IsTheUserCorrect(UserResults userState, int correctAnswer)
         {
-            (int userAnswer, int correctAnswer) = results;
-            if (userAnswer.Equals(correctAnswer))
+            if (userState.prevAnswerText.Equals(correctAnswer))
             {
                 return $"YAY, CORRECT! ✅🎉";
             }
-            return $"Wrong. '{something.FirstNumber} {something.Operatororor} {something.SecondNumber}' is {correctAnswer}! ❌";
+            return $"Wrong. '{userState.prevFirstNumber} {userState.prevOperator} {userState.prevSecondNumber}' is {correctAnswer}! ❌";
         }
     }
 
@@ -70,49 +76,19 @@ namespace SimpleWebMathsQuiz
     {
         private readonly Quiz quiz = new Quiz();
 
-        public Tuple<int, int> GetResultsFromPage(UserResults userState, HtmlGenericControl stateDebug)
+        public int GetResultsFromPage(UserResults userState, HtmlGenericControl stateDebug)
         {
-            int.TryParse(Request.Form["firstNumber"], out int firstNum);
-            int.TryParse(Request.Form["secondNumber"], out int secondNum);
+            int correctAnswer = (int)quiz.GetCorrectAnswer(userState.prevOperator, userState.prevFirstNumber, userState.prevSecondNumber);
             int.TryParse(Request.Form["text"], out int userAnswer);
-            char oper = Request.Form["operators"][0];
+            userState.prevAnswerText = userAnswer;
 
-            int correctAnswer = (int)quiz.GetCorrectAnswer(oper, firstNum, secondNum);
-
-            userState.UsersAnswers.Add(userAnswer);
-            userState.UsersResults.Add(userAnswer == correctAnswer);
+            userState.UsersAnswers.Add(userState.prevAnswerText);
+            userState.UsersResults.Add(userState.prevAnswerText == correctAnswer);
 
             stateDebug.InnerHtml = JsonSerializer.Serialize(userState);
             QuestionsRemaining.InnerText = "Questions Remaining: " + userState.HowManyQuestions;
 
-            return Tuple.Create(userAnswer, correctAnswer);
-        }
-
-        public SubmittedData CaptureSubmittedData()
-        {
-            int.TryParse(Request.Form["firstNumber"], out int pFirstNumber);
-            int.TryParse(Request.Form["secondNumber"], out int pSecondNumber);
-
-            string pAnswerText = Request.Form["text"];
-
-            SubmittedData something = new SubmittedData
-            {
-                FirstNumber = pFirstNumber,
-                SecondNumber = pSecondNumber,
-                Operatororor = Request.Form["operators"][0],
-                AnswerText = pAnswerText
-            };
-
-            return something;
-        }
-
-        public void Web_AskQuestion()
-        {
-            (string questionText, int firstNum, int secondNum, char op) = quiz.AskQuestion(10);
-            question.InnerText = questionText;
-            firstNumber.Attributes["value"] = firstNum.ToString();
-            secondNumber.Attributes["value"] = secondNum.ToString();
-            operators.Attributes["value"] = op.ToString();
+            return correctAnswer;
         }
 
         public void ProcessQuestion(UserResults userState)
@@ -120,14 +96,11 @@ namespace SimpleWebMathsQuiz
 
             if (userState.HowManyQuestions > 0)
             {
-                Tuple<int, int> results = GetResultsFromPage(userState, stateDebug);
+                int correctAnswer = GetResultsFromPage(userState, stateDebug);
 
-                SubmittedData UserSubmittedData = CaptureSubmittedData();
-
-                answerText.InnerText = quiz.IsTheUserCorrect(results, UserSubmittedData);
+                answerText.InnerText = quiz.IsTheUserCorrect(userState, correctAnswer);
 
                 userState.HowManyQuestions--;
-                UserAnswers.Attributes["value"] = JsonSerializer.Serialize(userState);
             }
             else
             {
@@ -137,43 +110,50 @@ namespace SimpleWebMathsQuiz
                 int correctCount = userState.UsersResults.Count(isTrue);
                 question.InnerText = "Congratulations! You have finished the quiz with " + correctCount + " out of " + (userState.UsersResults.Count()) + " correct! ";
                 answerText.InnerText = "🎉🎉🎉";
+                Session["UserState"] = null;
             }
 
         }
 
-        public void HandleButtonClick()
+        public UserResults HandleButtonClick()
         {
-            if (UserAnswers.Attributes["value"] == null) // If no maths questions have been asked yet.
+            UserResults userState = JsonSerializer.Deserialize<UserResults>(Session["UserState"].ToString());
+            if (userState.HowManyQuestions == -1) // If no maths questions have been asked yet.
             {
                 int.TryParse(Request.Form["text"], out int HowManyQuestions);
                 HowManyQuestions--;
-                UserAnswers.Attributes["value"] = "{\"UsersAnswers\": [],\"UsersResults\": [],\"HowManyQuestions\":" + HowManyQuestions + "}";
 
+                userState.HowManyQuestions = HowManyQuestions;
             }
             else // The user has submitted answers
             {
-                UserResults userState = JsonSerializer.Deserialize<UserResults>(Request.Form["UserAnswers"]);
-
+                (string questionText, int firstNum, int secondNum, char op) = quiz.AskQuestion(10);
+                question.InnerText = questionText;
 
                 ProcessQuestion(userState);
+
+                userState.prevFirstNumber = firstNum;
+                userState.prevSecondNumber = secondNum;
+                userState.prevOperator = op;
             }
-        }
-
-        protected void Timer1_Tick(object sender, EventArgs e)
-        {
-
+            return userState;
         }
 
         protected void Page_Load(object sender, EventArgs e)
         {
-
-            question.InnerText = "How many questions would you like to attempt?";
-
             if (IsPostBack) // Button has been clicked
             {
-                Web_AskQuestion();
+                Session["UserState"] = JsonSerializer.Serialize(HandleButtonClick());
+            }
+            else
+            {
+                question.InnerText = "How many questions would you like to attempt?";
+                UserResults newSession = new UserResults();
+                newSession.UsersAnswers = new List<int>();
+                newSession.UsersResults = new List<bool>();
+                newSession.HowManyQuestions = -1;
 
-                HandleButtonClick();
+                Session["UserState"] = JsonSerializer.Serialize<UserResults>(newSession);
             }
         }
     }

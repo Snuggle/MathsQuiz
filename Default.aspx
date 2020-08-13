@@ -30,8 +30,8 @@
 
 
                 <br/>
-                <button class="btn btn-primary btn-lg btn-block" type="submit" name="submit" value="I've answered the question!">
-                    <div id="divRemainingTime"  runat="server"></div>
+                <button class="btn btn-primary btn-lg btn-block" type="submit" name="submit">
+                    <div id="divRemainingTime"  runat="server">You have 10 seconds to answer this question!</div>
                 </button>
                 <hr />
                 <code><p id="stateDebug" runat="server"></p></code>
