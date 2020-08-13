@@ -65,14 +65,14 @@ namespace SimpleWebMathsQuiz
             operators.Attributes["value"] = op.ToString();
         }
 
-        public string IsTheUserCorrect(Tuple<int, int> results, string text, SubmittedData something)
+        public string IsTheUserCorrect(Tuple<int, int> results, SubmittedData something)
         {
             (int userAnswer, int correctAnswer) = results;
             if (userAnswer.Equals(correctAnswer))
             {
-                return $"The answer you had provided to '{something.FirstNumber} {something.Operatororor} {something.SecondNumber}' was: {text}. YAY, CORRECT! ✅🎉";
+                return $"The answer you had provided to '{something.FirstNumber} {something.Operatororor} {something.SecondNumber}' was: {userAnswer}. YAY, CORRECT! ✅🎉";
             }
-            return $"The answer you had provided to '{something.FirstNumber} {something.Operatororor} {something.SecondNumber}' was: {text}. Sadly, you were wrong... It was {correctAnswer}! ❌";
+            return $"The answer you had provided to '{something.FirstNumber} {something.Operatororor} {something.SecondNumber}' was: {userAnswer}. Sadly, you were wrong... It was {correctAnswer}! ❌";
         }
     }
 
@@ -84,15 +84,13 @@ namespace SimpleWebMathsQuiz
         {
             int.TryParse(Request.Form["firstNumber"], out int firstNum);
             int.TryParse(Request.Form["secondNumber"], out int secondNum);
+            int.TryParse(Request.Form["text"], out int userAnswer);
             char oper = Request.Form["operators"][0];
 
             int correctAnswer = (int)quiz.GetCorrectAnswer(oper, firstNum, secondNum);
 
-            int.TryParse(Request.Form["text"], out int userAnswer);
-
             userState.UsersAnswers.Add(userAnswer);
             userState.UsersResults.Add(userAnswer == correctAnswer);
-
             string debugString = JsonSerializer.Serialize(userState);
 
             stateDebug.InnerHtml = debugString + " ~ Questions Remaining: " + userState.HowManyQuestions;
@@ -113,7 +111,6 @@ namespace SimpleWebMathsQuiz
                 FirstNumber = pFirstNumber,
                 SecondNumber = pSecondNumber,
                 Operatororor = pOperatororor,
-
                 AnswerText = pAnswerText
             };
 
@@ -122,13 +119,14 @@ namespace SimpleWebMathsQuiz
 
         public void ProcessQuestion(UserResults userState)
         {
+
             if (userState.HowManyQuestions > 0)
             {
                 Tuple<int, int> results = GetResultsFromPage(userState, stateDebug);
 
                 SubmittedData UserSubmittedData = CaptureSubmittedData();
 
-                answerText.InnerText = quiz.IsTheUserCorrect(results, Request.Form["text"], UserSubmittedData);
+                answerText.InnerText = quiz.IsTheUserCorrect(results, UserSubmittedData);
 
                 userState.HowManyQuestions--;
                 UserAnswers.Attributes["value"] = JsonSerializer.Serialize(userState);
@@ -142,6 +140,7 @@ namespace SimpleWebMathsQuiz
                 question.InnerText = "Congratulations! You have finished the quiz with " + correctCount + " out of " + (userState.UsersResults.Count()) + " correct! ";
                 answerText.InnerText = "🎉🎉🎉";
             }
+
         }
 
         public void HandleButtonClick()
@@ -160,6 +159,11 @@ namespace SimpleWebMathsQuiz
 
                 ProcessQuestion(userState);
             }
+        }
+
+        protected void Timer1_Tick(object sender, EventArgs e)
+        {
+
         }
 
         protected void Page_Load(object sender, EventArgs e)
