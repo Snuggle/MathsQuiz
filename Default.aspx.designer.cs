@@ -33,15 +33,6 @@ namespace SimpleWebMathsQuiz
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl answerText;
 
         /// <summary>
-        /// QuestionsRemaining control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl QuestionsRemaining;
-
-        /// <summary>
         /// question control.
         /// </summary>
         /// <remarks>
@@ -112,6 +103,15 @@ namespace SimpleWebMathsQuiz
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl divRemainingTime;
+
+        /// <summary>
+        /// QuestionsRemaining control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl QuestionsRemaining;
 
         /// <summary>
         /// stateDebug control.

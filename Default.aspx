@@ -14,7 +14,6 @@
             <h1>Simple Maths Quiz</h1>
             <form id="form1" autocomplete="off" method="post" runat="server">   
                 <h3 id="answerText" runat="server"></h3>
-                <h5 id="QuestionsRemaining" runat="server"></h5>
                 <hr />
                 <h4 id="question" runat="server"></h4>
                 <div id="quizElements" runat="server">
@@ -31,8 +30,11 @@
 
 
                 <br/>
-                <button class="btn btn-primary btn-lg btn-block" type="submit" id="submit">
-                    <div id="divRemainingTime"  runat="server">You have 10 seconds to answer this question!</div>
+                    <div id="TimerAlert" visibility: hidden>
+
+                <div class="alert alert-warning" role="alert"><p style="display:inline">⚠️ · You have <strong><div id="divRemainingTime" style="display: inline" runat="server">10</div></strong> seconds to answer!</p><hr><p id="QuestionsRemaining" runat="server"></p></div>
+                </div>
+                        <button class="btn btn-primary btn-lg btn-block" type="submit" id="submit">Proceed
                 </button>
                     </div>
                 <hr />
