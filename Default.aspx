@@ -17,7 +17,8 @@
                 <h5 id="QuestionsRemaining" runat="server"></h5>
                 <hr />
                 <h4 id="question" runat="server"></h4>
-                <input type="number" class="form-control" min="-1000" max="1000" name="text" value="" />
+                <div id="quizElements" runat="server">
+                <input type="text" class="form-control" value="" id="text" runat="server"/>
 
                 <input type="hidden" name="operators" id="operators" runat="server" />
                 <input type="hidden" name="secondNumber" id="secondNumber" runat="server" />
@@ -30,9 +31,10 @@
 
 
                 <br/>
-                <button class="btn btn-primary btn-lg btn-block" type="submit" name="submit">
+                <button class="btn btn-primary btn-lg btn-block" type="submit" id="submit">
                     <div id="divRemainingTime"  runat="server">You have 10 seconds to answer this question!</div>
                 </button>
+                    </div>
                 <hr />
                 <code><p id="stateDebug" runat="server"></p></code>
             </form>

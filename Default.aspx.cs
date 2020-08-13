@@ -15,14 +15,12 @@ namespace SimpleWebMathsQuiz
 
         public int GetResultsFromPage(UserResults userState, HtmlGenericControl stateDebug)
         {
-            PreviousValues previous = userState.Previous;
+            int correctAnswer = (int)quiz.GetCorrectAnswer(userState.Previous.PrevOperator, userState.Previous.PrevFirstNumber, userState.Previous.PrevSecondNumber);
+            int userAnswer = int.Parse(Request.Form["text"]);
+            userState.Previous.PrevAnswerText = userAnswer;
 
-            int correctAnswer = (int)quiz.GetCorrectAnswer(previous.PrevOperator, previous.PrevFirstNumber, previous.PrevSecondNumber);
-            int.TryParse(Request.Form["text"], out int userAnswer);
-            previous.PrevAnswerText = userAnswer;
-
-            userState.UsersAnswers.Add(previous.PrevAnswerText);
-            userState.UsersResults.Add(previous.PrevAnswerText == correctAnswer);
+            userState.UsersAnswers.Add(userState.Previous.PrevAnswerText);
+            userState.UsersResults.Add(userState.Previous.PrevAnswerText == correctAnswer);
 
             stateDebug.InnerHtml = JsonSerializer.Serialize(userState);
             QuestionsRemaining.InnerText = "Questions Remaining: " + userState.HowManyQuestions;
@@ -33,24 +31,25 @@ namespace SimpleWebMathsQuiz
         public bool ProcessQuestion(UserResults userState)
         {
 
-            if (userState.HowManyQuestions > 0)
+            if (userState.HowManyQuestions >= 1)
             {
+                userState.HowManyQuestions--;
+
                 int correctAnswer = GetResultsFromPage(userState, stateDebug);
 
                 answerText.InnerText = quiz.IsTheUserCorrect(userState, correctAnswer);
 
-                userState.HowManyQuestions--;
-                return true;
             }
-            else
+            if (userState.HowManyQuestions == 0)
             {
                 bool isTrue(bool x) => x;
                 int correctCount = userState.UsersResults.Count(isTrue);
                 question.InnerText = "Congratulations! You have finished the quiz with " + correctCount + " out of " + (userState.UsersResults.Count()) + " correct! ";
                 answerText.InnerText = "🎉🎉🎉";
-                return false;
+                quizElements.Visible = false;
+                return true;
             }
-
+            return false;
         }
 
         public UserResults HandleButtonClick()
@@ -59,13 +58,12 @@ namespace SimpleWebMathsQuiz
             if (userState.HowManyQuestions == null) // If no maths questions have been asked yet.
             {
                 int.TryParse(Request.Form["text"], out int HowManyQuestions);
-                HowManyQuestions--;
-
                 userState.HowManyQuestions = HowManyQuestions;
+
             } else
             {
-                bool shouldContinue = ProcessQuestion(userState);
-                if (!shouldContinue) { return userState; }
+                bool finishedQuestions = ProcessQuestion(userState);
+                if (finishedQuestions) { return userState; }
             }
                 Question randomlyGeneratedQuestion = quiz.AskQuestion(10);
                 question.InnerText = randomlyGeneratedQuestion.QuestionText;

@@ -51,6 +51,24 @@ namespace SimpleWebMathsQuiz
         protected global::System.Web.UI.HtmlControls.HtmlGenericControl question;
 
         /// <summary>
+        /// quizElements control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlGenericControl quizElements;
+
+        /// <summary>
+        /// text control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.HtmlControls.HtmlInputText text;
+
+        /// <summary>
         /// operators control.
         /// </summary>
         /// <remarks>
