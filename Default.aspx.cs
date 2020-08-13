@@ -30,12 +30,7 @@ namespace SimpleWebMathsQuiz
         private readonly Dictionary<char, Func<double, double, double>> potato =
             new Dictionary<char, Func<double, double, double>>()
             {
-                { '+', (oneNum, twoNum) => oneNum + twoNum },
-                { '-', (oneNum, twoNum) => oneNum - twoNum },
-                { '*', (oneNum, twoNum) => oneNum * twoNum },
-                { '/', (oneNum, twoNum) => oneNum / twoNum },
-                { '√', (oneNum, twoNum) => (int) Math.Sqrt(oneNum) },
-                { '^', (oneNum, twoNum) => (int) Math.Pow(oneNum, twoNum) }
+                { '/', (oneNum, twoNum) => oneNum / twoNum }
             };
 
         public double GetCorrectAnswer(char op, int firstNum, int secondNum)
@@ -50,6 +45,11 @@ namespace SimpleWebMathsQuiz
 
             int firstNum = rnd.Next(1, maxRandNumber);
             int secondNum = rnd.Next(1, maxRandNumber);
+
+            if (op.Equals('/'))
+            {
+                firstNum *= secondNum;
+            }
 
             string questionText = $"What is the answer to {firstNum} {op} {secondNum}? "; // Much nicer, string interpolation! Closes #12. 
             return Tuple.Create(questionText, firstNum, secondNum, op);
