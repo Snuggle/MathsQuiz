@@ -9,81 +9,20 @@ using System.Web.UI.HtmlControls;
 
 namespace SimpleWebMathsQuiz
 {
-    public class UserResults
-    {
-        public List<int> UsersAnswers { get; set; }
-        public List<bool> UsersResults { get; set; }
-        public int HowManyQuestions { get; set; }
-
-            public int prevFirstNumber { get; set; }
-            public int prevSecondNumber { get; set; }
-            public char prevOperator { get; set; }
-            public int prevAnswerText { get; set; }
-    }
-
-    public class Quiz
-    {
-        private readonly Random rnd = new Random();
-        private readonly Dictionary<char, Func<double, double, double>> potato =
-            new Dictionary<char, Func<double, double, double>>()
-            {
-                { '+', (oneNum, twoNum) => oneNum + twoNum },
-                { '-', (oneNum, twoNum) => oneNum - twoNum },
-                { '*', (oneNum, twoNum) => oneNum * twoNum },
-                { '/', (oneNum, twoNum) => oneNum / twoNum },
-                { '√', (oneNum, twoNum) => (int) Math.Sqrt(oneNum) },
-                { '^', (oneNum, twoNum) => (int) Math.Pow(oneNum, twoNum) }
-            };
-
-        public double GetCorrectAnswer(char op, int firstNum, int secondNum)
-        {
-            try
-            {
-                return potato[op](firstNum, secondNum);
-            } catch {
-                return 999;
-            }
-        }
-
-        public Tuple<string, int, int, char> AskQuestion(int maxRandNumber)
-        {
-            int index = rnd.Next(potato.Count);
-            char op = potato.Keys.ElementAt(index);
-
-            int firstNum = rnd.Next(1, maxRandNumber);
-            int secondNum = rnd.Next(1, maxRandNumber);
-
-            if (op.Equals('/'))
-            {
-                firstNum *= secondNum;
-            }
-
-            string questionText = $"What is the answer to {firstNum} {op} {secondNum}? "; // Much nicer, string interpolation! Closes #12. 
-            return Tuple.Create(questionText, firstNum, secondNum, op);
-        }
-
-        public string IsTheUserCorrect(UserResults userState, int correctAnswer)
-        {
-            if (userState.prevAnswerText.Equals(correctAnswer))
-            {
-                return $"YAY, CORRECT! ✅🎉";
-            }
-            return $"Wrong. '{userState.prevFirstNumber} {userState.prevOperator} {userState.prevSecondNumber}' is {correctAnswer}! ❌";
-        }
-    }
-
     public partial class Default : System.Web.UI.Page
     {
         private readonly Quiz quiz = new Quiz();
 
         public int GetResultsFromPage(UserResults userState, HtmlGenericControl stateDebug)
         {
-            int correctAnswer = (int)quiz.GetCorrectAnswer(userState.prevOperator, userState.prevFirstNumber, userState.prevSecondNumber);
-            int.TryParse(Request.Form["text"], out int userAnswer);
-            userState.prevAnswerText = userAnswer;
+            PreviousValues previous = userState.Previous;
 
-            userState.UsersAnswers.Add(userState.prevAnswerText);
-            userState.UsersResults.Add(userState.prevAnswerText == correctAnswer);
+            int correctAnswer = (int)quiz.GetCorrectAnswer(previous.PrevOperator, previous.PrevFirstNumber, previous.PrevSecondNumber);
+            int.TryParse(Request.Form["text"], out int userAnswer);
+            previous.PrevAnswerText = userAnswer;
+
+            userState.UsersAnswers.Add(previous.PrevAnswerText);
+            userState.UsersResults.Add(previous.PrevAnswerText == correctAnswer);
 
             stateDebug.InnerHtml = JsonSerializer.Serialize(userState);
             QuestionsRemaining.InnerText = "Questions Remaining: " + userState.HowManyQuestions;
@@ -127,14 +66,14 @@ namespace SimpleWebMathsQuiz
             }
             else // The user has submitted answers
             {
-                (string questionText, int firstNum, int secondNum, char op) = quiz.AskQuestion(10);
-                question.InnerText = questionText;
+                Question randomlyGeneratedQuestion = quiz.AskQuestion(10);
+                question.InnerText = randomlyGeneratedQuestion.QuestionText;
 
                 ProcessQuestion(userState);
 
-                userState.prevFirstNumber = firstNum;
-                userState.prevSecondNumber = secondNum;
-                userState.prevOperator = op;
+                userState.Previous.PrevFirstNumber = randomlyGeneratedQuestion.FirstNumber;
+                userState.Previous.PrevSecondNumber = randomlyGeneratedQuestion.SecondNumber;
+                userState.Previous.PrevOperator = randomlyGeneratedQuestion.Operator;
             }
             return userState;
         }

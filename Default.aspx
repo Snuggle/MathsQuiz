@@ -12,7 +12,7 @@
     <div class="container">
       <div class="py-5 text-center">
             <h1>Simple Maths Quiz</h1>
-            <form id="form1" method="post" runat="server">   
+            <form id="form1" autocomplete="off" method="post" runat="server">   
                 <h3 id="answerText" runat="server"></h3>
                 <h5 id="QuestionsRemaining" runat="server"></h5>
                 <hr />
