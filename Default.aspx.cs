@@ -30,7 +30,7 @@ namespace SimpleWebMathsQuiz
             return correctAnswer;
         }
 
-        public void ProcessQuestion(UserResults userState)
+        public bool ProcessQuestion(UserResults userState)
         {
 
             if (userState.HowManyQuestions > 0)
@@ -40,16 +40,15 @@ namespace SimpleWebMathsQuiz
                 answerText.InnerText = quiz.IsTheUserCorrect(userState, correctAnswer);
 
                 userState.HowManyQuestions--;
+                return true;
             }
             else
             {
-                GetResultsFromPage(userState, stateDebug);
-
                 bool isTrue(bool x) => x;
                 int correctCount = userState.UsersResults.Count(isTrue);
                 question.InnerText = "Congratulations! You have finished the quiz with " + correctCount + " out of " + (userState.UsersResults.Count()) + " correct! ";
                 answerText.InnerText = "🎉🎉🎉";
-                Session["UserState"] = null;
+                return false;
             }
 
         }
@@ -57,24 +56,24 @@ namespace SimpleWebMathsQuiz
         public UserResults HandleButtonClick()
         {
             UserResults userState = JsonSerializer.Deserialize<UserResults>(Session["UserState"].ToString());
-            if (userState.HowManyQuestions == -1) // If no maths questions have been asked yet.
+            if (userState.HowManyQuestions == null) // If no maths questions have been asked yet.
             {
                 int.TryParse(Request.Form["text"], out int HowManyQuestions);
                 HowManyQuestions--;
 
                 userState.HowManyQuestions = HowManyQuestions;
-            }
-            else // The user has submitted answers
+            } else
             {
+                bool shouldContinue = ProcessQuestion(userState);
+                if (!shouldContinue) { return userState; }
+            }
                 Question randomlyGeneratedQuestion = quiz.AskQuestion(10);
                 question.InnerText = randomlyGeneratedQuestion.QuestionText;
-
-                ProcessQuestion(userState);
 
                 userState.Previous.PrevFirstNumber = randomlyGeneratedQuestion.FirstNumber;
                 userState.Previous.PrevSecondNumber = randomlyGeneratedQuestion.SecondNumber;
                 userState.Previous.PrevOperator = randomlyGeneratedQuestion.Operator;
-            }
+            
             return userState;
         }
 
@@ -90,7 +89,7 @@ namespace SimpleWebMathsQuiz
                 UserResults newSession = new UserResults();
                 newSession.UsersAnswers = new List<int>();
                 newSession.UsersResults = new List<bool>();
-                newSession.HowManyQuestions = -1;
+                newSession.Previous = new PreviousValues();
 
                 Session["UserState"] = JsonSerializer.Serialize<UserResults>(newSession);
             }

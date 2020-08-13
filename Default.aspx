@@ -17,7 +17,7 @@
                 <h5 id="QuestionsRemaining" runat="server"></h5>
                 <hr />
                 <h4 id="question" runat="server"></h4>
-                <input type="text" class="form-control" name="text" value="" />
+                <input type="number" class="form-control" min="-1000" max="1000" name="text" value="" />
 
                 <input type="hidden" name="operators" id="operators" runat="server" />
                 <input type="hidden" name="secondNumber" id="secondNumber" runat="server" />

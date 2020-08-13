@@ -2,7 +2,7 @@
     if (document.getElementById('stateDebug').innerText === '') {
         document.getElementById('divRemainingTime').innerText = "This quiz is timed. You will have 10 seconds per question."
     } else {
-        var timeInterval = '10000';
+        var timeInterval = '1000000000';
         var remainingSeconds = (timeInterval / 1000);
         var timeInterval = setInterval(function () {
             document.getElementById('divRemainingTime').innerText = --remainingSeconds;

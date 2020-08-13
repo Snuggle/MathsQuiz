@@ -9,7 +9,7 @@ namespace SimpleWebMathsQuiz
     {
             public List<int> UsersAnswers { get; set; }
             public List<bool> UsersResults { get; set; }
-            public int HowManyQuestions { get; set; }
+            public int? HowManyQuestions { get; set; }
             public PreviousValues Previous { get; set; }
        
     }
