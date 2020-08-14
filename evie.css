@@ -1,0 +1,56 @@
+﻿:root {
+    --favorite-color: #640032;
+    --light-favorite-color: #a5125b;
+}
+
+
+/* Chrome, Safari, Edge, Opera */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+input[type=number] {
+    -moz-appearance: textfield;
+}
+
+.btn-primary {
+    background-color: var(--light-favorite-color);
+    border-color: var(--light-favorite-color);
+    margin: auto;
+    width: 40%;
+}
+
+    .btn-primary:hover {
+        background-color: var(--favorite-color);
+        border-color: var(--favorite-color);
+    }
+
+    .btn-primary:active {
+        background-color: var(--favorite-color) !important;
+        border-color: #640032 !important;
+    }
+
+    .btn-primary:focus {
+        background-color: var(--favorite-color);
+        border-color: var(--favorite-color);
+        box-shadow: 0 0 0 .2rem RGBA(165, 18, 91,0.25);
+    }
+
+    .btn-primary:active:focus {
+        background-color: var(--favorite-color);
+        border-color: var(--favorite-color);
+        box-shadow: 0 0 0 .2rem RGBA(165, 18, 91,0.25) !important;
+    }
+
+.form-control {
+    width: 80%;
+    margin: auto;
+}
+
+    .form-control:focus {
+        border-color: var(--favorite-color);
+        box-shadow: 0 0 0 .2rem RGBA(165, 18, 91,0.25);
+    }

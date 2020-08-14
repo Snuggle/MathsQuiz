@@ -14,9 +14,9 @@ namespace SimpleWebMathsQuiz
                 { '+', (oneNum, twoNum) => oneNum + twoNum },
                 { '-', (oneNum, twoNum) => oneNum - twoNum },
                 { '*', (oneNum, twoNum) => oneNum * twoNum },
-                { '/', (oneNum, twoNum) => oneNum / twoNum },
-                { '√', (oneNum, twoNum) => (int) Math.Sqrt(oneNum) },
-                { '^', (oneNum, twoNum) => (int) Math.Pow(oneNum, twoNum) }
+                { '/', (oneNum, twoNum) => oneNum / twoNum }
+                /*{ '√', (oneNum, twoNum) => (int) Math.Sqrt(oneNum) },
+                { '^', (oneNum, twoNum) => (int) Math.Pow(oneNum, twoNum) }*/
             };
 
         public double GetCorrectAnswer(char op, int firstNum, int secondNum)

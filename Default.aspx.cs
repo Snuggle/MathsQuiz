@@ -80,6 +80,7 @@ namespace SimpleWebMathsQuiz
             if (IsPostBack) // Button has been clicked
             {
                 Session["UserState"] = JsonSerializer.Serialize(HandleButtonClick());
+                text.Value = "";
             }
             else
             {
