@@ -11,6 +11,5 @@ namespace SimpleWebMathsQuiz
         public int PrevSecondNumber { get; set; }
         public char PrevOperator { get; set; }
         public int PrevAnswerText { get; set; }
-
     }
 }
