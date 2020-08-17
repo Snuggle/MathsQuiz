@@ -14,30 +14,32 @@ namespace SimpleWebMathsQuiz
     {
         private readonly Quiz quiz = new Quiz();
 
-        public int GetResultsFromPage(UserResults userState, HtmlGenericControl stateDebug)
+        public bool GameShouldContinue = true;
+
+        private UserResults userState = new UserResults();
+
+        public int GetResultsFromPage(HtmlGenericControl stateDebug)
         {
-            int correctAnswer = (int)quiz.GetCorrectAnswer(userState.Previous.PrevOperator, userState.Previous.PrevFirstNumber, userState.Previous.PrevSecondNumber);
             int userAnswer = int.Parse(Request.Form["text"]);
             userState.Previous.PrevAnswerText = userAnswer;
 
+            int correctAnswer = quiz.PrevGetCorrectAnswer(userState.Previous);
+
             userState.UsersAnswers.Add(userState.Previous.PrevAnswerText);
-            userState.UsersResults.Add(userState.Previous.PrevAnswerText == correctAnswer);
-
+            userState.UsersResults.Add(userAnswer == correctAnswer);
             stateDebug.InnerHtml = JsonSerializer.Serialize(userState);
-            QuestionsRemaining.InnerText = "Questions Remaining: " + userState.HowManyQuestions;
 
+            QuestionsRemaining.InnerText = "Questions Remaining: " + userState.HowManyQuestions;
             return correctAnswer;
         }
 
-        public bool ProcessQuestion(UserResults userState)
+        public void ProcessQuestion()
         {
 
             if (userState.HowManyQuestions >= 1)
             {
                 userState.HowManyQuestions--;
-
-                int correctAnswer = GetResultsFromPage(userState, stateDebug);
-
+                int correctAnswer = GetResultsFromPage(stateDebug);
                 answerText.InnerText = quiz.IsTheUserCorrect(userState, correctAnswer);
 
             }
@@ -48,17 +50,11 @@ namespace SimpleWebMathsQuiz
                 question.InnerText = "Congratulations! You have finished the quiz with " + correctCount + " out of " + (userState.UsersResults.Count()) + " correct! ";
                 answerText.InnerText = "🎉🎉🎉";
                 quizElements.Visible = false;
-                return true;
+                GameShouldContinue = false;
             }
-            return false;
         }
 
-        public bool HaveQuestionsBeenAsked()
-        {
-            return true;
-        }
-
-        public UserResults GenerateQuestionText(UserResults userState)
+        public void GenerateQuestionText()
         {
             Question randomlyGeneratedQuestion = quiz.AskQuestion(10);
             question.InnerText = randomlyGeneratedQuestion.QuestionText;
@@ -66,45 +62,53 @@ namespace SimpleWebMathsQuiz
             userState.Previous.PrevFirstNumber = randomlyGeneratedQuestion.FirstNumber;
             userState.Previous.PrevSecondNumber = randomlyGeneratedQuestion.SecondNumber;
             userState.Previous.PrevOperator = randomlyGeneratedQuestion.Operator;
-
-            return userState;
         }
 
-        public UserResults HandleButtonClick()
+        public bool GameHasNotStarted()
         {
-            UserResults userState = JsonSerializer.Deserialize<UserResults>(Session["UserState"].ToString());
-            if (userState.HowManyQuestions == null) // If no maths questions have been asked yet.
+            return (userState.HowManyQuestions == null);
+        }
+
+        public void SetupGame()
+        {
+            int.TryParse(Request.Form["text"], out int HowManyQuestions);
+            userState.HowManyQuestions = HowManyQuestions;
+        }
+
+        public void HandleButtonClick()
+        {
+            userState = JsonSerializer.Deserialize<UserResults>(Session["UserState"].ToString());
+
+            if (GameHasNotStarted()) // If no maths questions have been asked yet.
             {
-                int.TryParse(Request.Form["text"], out int HowManyQuestions);
-                userState.HowManyQuestions = HowManyQuestions;
+                SetupGame();
             } 
             else
             {
-                bool finishedQuestions = ProcessQuestion(userState);
-                if (finishedQuestions) 
-                {
-                    return userState; 
-                }
+                ProcessQuestion();
             }
 
-            userState = GenerateQuestionText(userState);
-            
-            return userState;
+
+            if (GameShouldContinue)
+            {
+                GenerateQuestionText();
+            }
+
+            Session["UserState"] = JsonSerializer.Serialize(userState);
         }
 
         protected void Page_Load(object sender, EventArgs e)
         {
             if (IsPostBack) // Button has been clicked
             {
-                Session["UserState"] = JsonSerializer.Serialize(HandleButtonClick());
+                HandleButtonClick();
                 text.Value = "";
             }
             else
             {
                 question.InnerText = "How many questions would you like to attempt?";
-                UserResults newSession = new UserResults();
 
-                Session["UserState"] = JsonSerializer.Serialize<UserResults>(newSession);
+                Session["UserState"] = JsonSerializer.Serialize<UserResults>(userState);
             }
         }
     }

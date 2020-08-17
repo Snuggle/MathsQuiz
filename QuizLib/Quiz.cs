@@ -19,9 +19,14 @@ namespace SimpleWebMathsQuiz
                 { '^', (oneNum, twoNum) => (int) Math.Pow(oneNum, twoNum) }*/
             };
 
-        public double GetCorrectAnswer(char op, int firstNum, int secondNum)
+        public int GetCorrectAnswer(char op, int firstNum, int secondNum)
         {
-            return __Calculator[op](firstNum, secondNum);
+            return (int) __Calculator[op](firstNum, secondNum);
+        }
+
+        public int PrevGetCorrectAnswer(PreviousValues previous)
+        {
+            return (int) __Calculator[previous.PrevOperator](previous.PrevFirstNumber, previous.PrevSecondNumber);
         }
 
         public Question AskQuestion(int maxRandNumber)
