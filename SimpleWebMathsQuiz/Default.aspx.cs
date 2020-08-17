@@ -102,12 +102,7 @@ namespace SimpleWebMathsQuiz
             else
             {
                 question.InnerText = "How many questions would you like to attempt?";
-                UserResults newSession = new UserResults
-                {
-                    UsersAnswers = new List<int>(),
-                    UsersResults = new List<bool>(),
-                    Previous = new PreviousValues()
-                };
+                UserResults newSession = new UserResults();
 
                 Session["UserState"] = JsonSerializer.Serialize<UserResults>(newSession);
             }
