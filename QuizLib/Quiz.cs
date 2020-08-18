@@ -19,9 +19,9 @@ namespace SimpleWebMathsQuiz
                 { '^', (oneNum, twoNum) => (int) Math.Pow(oneNum, twoNum) }*/
             };
 
-        public int GetCorrectAnswer(char op, int firstNum, int secondNum)
+        public int GetCorrectAnswer(Question question)
         {
-            return (int) __Calculator[op](firstNum, secondNum);
+            return (int) __Calculator[question.Operator](question.FirstNumber, question.SecondNumber);
         }
 
         public int PrevGetCorrectAnswer(PreviousValues previous)
